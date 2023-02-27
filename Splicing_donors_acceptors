@@ -1,0 +1,30 @@
+import pandas as pd
+
+# Import the NanoSplicer checker file  *.h5.csv
+df = pd.read_csv("*$.h5.csv", index_col=0)
+reads = df['id'].nunique()
+splices = len(df.index)
+
+# Filter out <0.8 JAQ
+splicer_JAQ8 = df[df["JAQ"] >= 0.8]
+reads_8 = splicer_JAQ8['id'].nunique()
+splices_8 = splicer_JAQ8['id'].count()
+reads_8_percentage = reads_8/reads
+splices_8_percentage = splices_8/splices
+
+# Select + strand
+positive = splicer_JAQ8[splicer_JAQ8['transcript_strand'] == '+']
+reads_8_positive = positive['id'].nunique()
+splices_8_positive = positive['id'].count()
+reads_8_positive_percentage = reads_8_positive/reads
+splices_positive_8_percentage = splices_8_positive/splices
+splice_df = pd.DataFrame({"reads": [reads, reads_8, reads_8_percentage,reads_8_positive,reads_8_positive_percentage], "splices": [splices, splices_8, splices_8_percentage,splices_8_positive,splices_positive_8_percentage]})
+
+
+# Group by different types of loc and count id
+splice_types = positive.groupby('loc')['id'].count().sort_values(ascending=False)
+splice_read = positive.groupby('id')['loc'].count().sort_values(ascending=False)
+
+splice_types.to_csv('$.csv')
+splice_read.to_csv( '/RNA/*/$_read.csv')
+splice_df.to_csv('/$_statistisc.csv')
